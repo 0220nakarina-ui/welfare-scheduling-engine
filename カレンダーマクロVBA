@@ -1,0 +1,110 @@
+' ※VBAは初めて触る機能で、作成時は調べながら組み合わせています。
+
+' カレンダーを作ろう
+' →コメントアウト
+
+' 定数
+Const week        As Integer = 8                            ' 7日間
+Const week_Array  As Integer = 7                            ' 曜日
+Const month_Start As Integer = 1                            ' 月始め
+Const month_End   As Integer = 12                           ' 月終わり
+Const year_Start  As Integer = 1900                         ' 年始め
+Const year_End    As Integer = 2100                         ' 年終わり
+
+
+Sub カレンダー()
+
+' Dim →変数宣言
+Dim 年 As Integer, 月 As Integer                            ' Integer=int
+Dim 開始日 As Date                                          ' 該当月の1日目を設定
+Dim 最終日 As Integer                                       ' 該当月の最終日を設定(28~30)
+Dim row, column As Integer                                  ' r=Row(行)/c=Column(列)
+Dim day_cnt As Integer                                      ' 日付を設定
+Dim 曜日 As Variant                                         ' 曜日を設定(配列で扱う/Variantは何でも入るオールラウンダー)
+
+' 初期化
+ActiveSheet.Cells.Clear ' シートの中を削除しリセット
+
+
+' 年の入力（簡単な例: 1900から2100でチェック）
+Do
+    年 = CInt(InputBox("年を記入(1900から2100)"))
+Loop While 年 < year_Start Or 年 > year_End
+
+' 月の入力（1から12でチェック）
+Do
+    月 = CInt(InputBox("月を記入(1から12)"))
+    If 月 < month_Start Or 月 > month_End Then
+        MsgBox "1から12の数字を入力してください。再度入力してください。", vbExclamation
+    End If
+Loop While 月 < month_Start Or 月 > month_End
+
+
+' For使用(0~6まで繰り返す(日~土))/曜日タイトル表示設定
+曜日 = Array("日", "月", "火", "水", "木", "金", "土")
+For column = 0 To week_Array - 1                            ' 要素数に合わせる
+    Cells(2, column + 1).Value = 曜日(column)               ' 2行目に曜日を表示/c + 1 →列を1~7にする(これ苦手、注意)
+    Cells(2, column + 1).HorizontalAlignment = xlCenter     ' 曜日を中央揃え
+    Cells(2, column + 1).Font.Bold = True                   ' 曜日を太字にする
+Next column ' 曜日作成(?)終了
+
+
+' 日付表示設定
+開始日 = DateSerial(年, 月, 1)                              ' 該当月の1日目を設定
+最終日 = Day(DateSerial(年, 月 + 1, 0))                     ' 該当月の最終日を設定(翌月0=今月最終日)
+
+row = 3 ' 日付記入行設定(今回は3行目)
+column = Weekday(開始日, vbSunday)                          ' 1日目が何曜日か自動で取得
+
+
+' For使用/1~最終日まで繰り返す
+For day_cnt = 1 To 最終日
+    Cells(row, column).Value = day_cnt                      ' カレンダーに日付記入
+    Cells(row, column).Font.Size = 15
+    Cells(row, column).VerticalAlignment = xlTop            ' セルの上寄せ(見やすくする)
+    Cells(row, column).HorizontalAlignment = xlLeft         ' セルの左寄せ(見やすくする)
+
+
+' If使用/日曜日なら赤文字・土曜日なら青文字・それ以外は黒文字
+    If column = 1 Then
+        Cells(row, column).Font.Color = RGB(255, 0, 0)
+    ElseIf column = 7 Then
+        Cells(row, column).Font.Color = RGB(0, 0, 255)
+    End If '色分け終了
+
+    column = column + 1
+    
+    If column >= week Then
+      column = 1
+   
+      If row < week Then
+          row = row + 1                                     ' 5行目までは通常
+      Else
+          row = week                                        ' 6週目以降は最終行に固定
+      End If
+    End If
+    
+Next day_cnt
+
+
+' レイアウト関連
+' カレンダーの行をA1～G1と指定
+Range("A1:G1").Merge                                        ' A1~G1を結合
+Range("A1").Value = 年 & "年" & 月 & "月 カレンダー"        ' タイトル表示
+Range("A1").Font.Size = 25                                  ' タイトルの文字サイズ指定
+Range("A1").HorizontalAlignment = xlCenter                  ' タイトル配置指定(中央揃え)
+
+' 表のレイアウト設定(5週,6週で分ける)
+Columns("A:G").ColumnWidth = 20                             ' 列幅設定
+
+If row >= 8 Then                                            ' 6週の場合
+    Rows("3:8").RowHeight = 60                              ' 日付行高さ設定
+    Range("A2:G8").Borders.LineStyle = xlContinuous         ' 枠線を引く
+    
+ElseIf row < 8 Then                                         ' 5週の場合
+    Rows("3:7").RowHeight = 60                              ' 日付行高さ設定
+    Range("A2:G7").Borders.LineStyle = xlContinuous         ' 枠線を引く
+
+End If
+
+End Sub
