@@ -1,7 +1,7 @@
 # welfare-scheduling-engine
 福祉関連のツールを主に作成しています
 
-Python・VBA等の練習
+Python・VBA・GAS等の練習
 
 主目的
 現場負担軽減
