@@ -1,0 +1,91 @@
+Sub 週間カレンダー()
+
+    Dim ws As Worksheet
+    Dim startdate As Date
+    Dim r As Long
+    Dim i As Long
+    Dim weekcount As Long
+    Dim targetdate As Date
+    Dim lastDay As Long
+
+    Set ws = ActiveSheet
+
+    ' 初期化
+    ws.Cells.Clear
+
+    ' 開始日（今週の日曜日）
+    startdate = Date - Weekday(Date, vbSunday) + 1
+
+    ' 表示する週数
+    weekcount = 1
+
+    ' 列幅固定
+    ws.Columns("A").ColumnWidth = 80
+
+    r = 1
+
+    For i = 0 To (weekcount * 7) - 1
+
+        targetdate = startdate + i
+
+        ' 月末日取得
+        lastDay = Day(DateSerial(Year(targetdate), Month(targetdate) + 1, 0))
+
+        With ws.Cells(r, 1)
+
+            ' 日付
+            .Value = Format(targetdate, "dd")
+
+            ' 月ごとの色
+            Select Case Month(targetdate)
+
+                Case 2
+                    .Interior.Color = RGB(255, 255, 200)
+
+                Case 4, 6, 9, 11
+                    .Interior.Color = RGB(220, 255, 220)
+
+                Case Else
+                    .Interior.Color = RGB(255, 255, 255)
+
+            End Select
+
+            ' 折り返し
+            .WrapText = True
+
+            ' 左上配置
+            .HorizontalAlignment = xlLeft
+            .VerticalAlignment = xlTop
+
+            ' フォントサイズ
+            .Font.Size = 25
+
+            ' 行高さ固定
+            .RowHeight = 120
+
+            ' 曜日色
+            Select Case Weekday(targetdate, vbSunday)
+
+                Case 1
+                    .Font.Color = RGB(255, 0, 0)
+
+                Case 7
+                    .Font.Color = RGB(0, 0, 255)
+
+                Case Else
+                    .Font.Color = RGB(0, 0, 0)
+
+            End Select
+
+            ' 枠線
+            .Borders.LineStyle = xlContinuous
+
+        End With
+
+        r = r + 1
+
+    Next i
+
+    MsgBox "カレンダーを更新しました"
+
+End Sub
