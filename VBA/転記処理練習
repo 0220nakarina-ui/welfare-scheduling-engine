@@ -1,0 +1,86 @@
+Sub 転記処理()
+
+    Dim wsInput As Worksheet
+    Dim wsMaster As Worksheet
+    Dim nextRow As Long
+    
+
+    ' シート設定
+    Set wsInput = Worksheets("書き込み用")
+    Set wsMaster = Worksheets("一覧")
+
+    On Error GoTo ErrHandler
+
+    ' 一覧シート取得(B列を基準)
+    nextRow = wsMaster.Cells(wsMaster.Rows.Count, 2).End(xlUp).Row + 1
+
+    ' データ転記
+    wsMaster.Cells(nextRow, 2).Value = wsInput.Range("E7").Value
+    wsMaster.Cells(nextRow, 3).Value = wsInput.Range("E10").Value
+    wsMaster.Cells(nextRow, 4).Value = wsInput.Range("I7").Value
+    wsMaster.Cells(nextRow, 5).Value = wsInput.Range("E13").Value
+    wsMaster.Cells(nextRow, 6).Value = wsInput.Range("E20").Value
+    wsMaster.Cells(nextRow, 7).Value = wsInput.Range("E29").Value
+
+    ' 日付書式
+    wsMaster.Cells(nextRow, 2).NumberFormat = "m/d"
+
+    ' 折り返し
+    wsMaster.Range(wsMaster.Cells(nextRow, 2), _
+                   wsMaster.Cells(nextRow, 7)).WrapText = True
+
+    ' 罫線
+    With wsMaster.Range(wsMaster.Cells(nextRow, 2), _
+                        wsMaster.Cells(nextRow, 7)).Borders
+
+        .LineStyle = xlContinuous
+        .Weight = xlThin
+        .Color = RGB(0, 0, 0)
+
+    End With
+
+    ' 行高さ自動調整
+    wsMaster.Rows(nextRow).AutoFit
+
+    ' 入力欄クリア
+    wsInput.Range("E10,I7,E13,E21,E20,E29").ClearContents
+
+    MsgBox "一覧へ転記が完了しました。"
+
+    Exit Sub
+
+ErrHandler:
+
+    MsgBox "エラーが発生しました：" & Err.Description
+
+End Sub
+
+
+' 日付ソート
+Sub SortDate()
+
+    Dim wsMaster As Worksheet
+    Dim lastRow As Long
+
+    Set wsMaster = Worksheets("一覧")
+
+    lastRow = wsMaster.Cells(wsMaster.Rows.Count, 2).End(xlUp).Row
+
+    With wsMaster.Sort
+
+        .SortFields.Clear
+
+        .SortFields.Add _
+            Key:=wsMaster.Range("B2:B" & lastRow), _
+            SortOn:=xlSortOnValues, _
+            Order:=xlAscending
+
+        .SetRange wsMaster.Range("B1:G" & lastRow)
+
+        .Header = xlYes
+        .Apply
+
+    End With
+
+End Sub
+
