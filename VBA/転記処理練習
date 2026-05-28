@@ -43,9 +43,9 @@ Sub 転記処理()
     wsMaster.Rows(nextRow).AutoFit
 
     ' 入力欄クリア
-    wsInput.Range("E10,I7,E13,E21,E20,E29").ClearContents
+    wsInput.Range("E10,I7,E13,E20,E29").ClearContents
 
-    MsgBox "一覧へ転記が完了しました。"
+    MsgBox "一覧へ書き込みが完了しました。"
 
     Exit Sub
 
