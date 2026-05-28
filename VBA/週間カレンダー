@@ -34,25 +34,11 @@ Sub 週間カレンダー()
         With ws.Cells(r, 1)
 
             ' 日付
-            .Value = Format(targetdate, "dd")
-
-            ' 月ごとの色
-            Select Case Month(targetdate)
-
-                Case 2
-                    .Interior.Color = RGB(255, 255, 200)
-
-                Case 4, 6, 9, 11
-                    .Interior.Color = RGB(220, 255, 220)
-
-                Case Else
-                    .Interior.Color = RGB(255, 255, 255)
-
-            End Select
+            .Value = Format(targetdate, "mm/dd (aaa)")
 
             ' 折り返し
             .WrapText = True
-
+            
             ' 左上配置
             .HorizontalAlignment = xlLeft
             .VerticalAlignment = xlTop
