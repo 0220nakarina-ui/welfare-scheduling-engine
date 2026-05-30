@@ -1,0 +1,103 @@
+// 転記処理
+function transferDataToMaster() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const inputSheet = ss.getSheetByName("書き込み用");
+  const masterSheet = ss.getSheetByName("一覧");
+
+  // エラー対策
+  try {
+    // 日付・担当者・カテゴリ・相談・対応・備考
+    const rangeE7  = inputSheet.getRange("E7");
+    const rangeE10 = inputSheet.getRange("E10");
+    const rangeI7  = inputSheet.getRange("I7");
+    const rangeE13 = inputSheet.getRange("E13");
+    const rangeE21 = inputSheet.getRange("E21");
+    const rangeE29 = inputSheet.getRange("E29");
+
+    // 配列として格納
+    const srcRanges = [rangeE7, rangeE10, rangeI7, rangeE13, rangeE21, rangeE29];
+
+    // B列の最終行取得
+    const lastRow = getNextRow(masterSheet, "B");
+    
+    // 値のみコピーする(書式はコピーしていない)
+    srcRanges.forEach((srcRange, index) => {
+      const destRange = masterSheet.getRange(lastRow, 2 + index);
+      srcRange.copyTo(destRange);
+    });
+
+    // 転記先の入力規則削除
+    const targetRowRange = masterSheet.getRange(lastRow, 2, 1, srcRanges.length);
+    targetRowRange.clearDataValidations(); 
+
+    // 書式の個別修正（日付は月/日形式、罫線は細い実線）
+    masterSheet.getRange(lastRow, 2).setNumberFormat("M/d");
+    targetRowRange.setBorder(
+      true, true, true, true, true, true, 
+      "#000000", 
+      SpreadsheetApp.BorderStyle.SOLID
+    );
+
+    // 仕上げの自動調整
+    targetRowRange.setWrap(true);
+    masterSheet.autoResizeRows(lastRow, 1);
+    
+    // 1行目の罫線修正
+    const headerRange = masterSheet.getRange("B1:G1");
+    headerRange.setBorder(
+      true, true, true, true, true, true, 
+      "#000000", 
+      SpreadsheetApp.BorderStyle.SOLID_MEDIUM // 1行目用の太線
+    );
+
+    Browser.msgBox("転記が完了しました！");
+
+  } catch (e) {
+    Browser.msgBox("エラーが発生しました: " + e.message);
+  }
+
+  // 入力欄クリア
+  inputSheet.getRangeList(["E10", "I7", "E13", "E21", "E29"]).clearContent();
+}
+
+// 最終行取得関数
+function getNextRow(sheet, columnLetter) {
+  const values = sheet.getRange(columnLetter + ":" + columnLetter).getValues();
+  let lastRow = 0;
+  for (let i = values.length - 1; i >= 0; i--) {
+    if (values[i][0] !== "") {
+      lastRow = i + 1;
+      break;
+    }
+  }
+  return lastRow === 0 ? 2 : lastRow + 1;   // 0行目なら2行目に、それ以外は1行ずつプラスする
+}
+
+// 自動日付更新(E7のみ)
+function onOpen() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const inputSheet = ss.getSheetByName("書き込み用");
+  const targetRange = inputSheet.getRange("E7");
+  
+  // 今日の日付をセット
+  targetRange.setValue(new Date());   // スプレッドシートを開くと自動で入力する
+  targetRange.setNumberFormat("yyyy/MM/dd");  // 表示形式
+  
+  // 背景色を白にする
+  targetRange.setBackground("#ffffff");
+  
+  // 罫線を太め（MEDIUM）にする
+  // setBorder(top, left, bottom, right, vertical, horizontal, color, style)
+  targetRange.setBorder(true, true, true, true, null, null, "#000000", SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+}
+
+// 一覧の日付をソート
+function SortDate(){
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const masterSheet = ss.getSheetByName("一覧");
+  const range = sheet.getRange("B2:B999" + sheet.getlastrow());
+
+  // 古い順にソート
+  range.sort({column:1,asecnding:true});
+}
+
