@@ -1,0 +1,114 @@
+// 月間カレンダー
+
+// 定数宣言
+const WEEK = 8;
+const WEEK_ARRAY = 7;
+const MONTH_START = 1;
+const MONTH_END = 12;
+const YEAR_START = 1900;
+const YEAR_END = 2100;  
+
+// 処理開始
+function calender() {
+
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+// 初期化
+sheet.clear()
+
+// 年入力
+let month;
+do {
+  month = Number(
+    SpreadsheetApp.getUi().prompt(
+      "月を入力してください(1~12)"
+    ).getResponseText()
+  );
+}while (month < MONTH_START || month > MONTH_END);
+
+// 曜日
+const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+
+for (let col = 0; col < WEEK_ARRAY; col++); {
+  const cell = sheet.getRange(2, col + 1);
+
+  cell.setValue(weekdays[col]);
+  cell.setHorizontalAlignment("center");
+  cell.setFontWeight("bold");
+}
+
+// 月初・月末取得
+const startDate = new Date(year, month - 1, 1);
+
+  const lastDay = new Date(year, month, 0).getDate();
+
+  let row = 3;
+
+  // 0=日曜日
+  let column = startDate.getDay() + 1;
+
+  // 日付入力
+  for (let dayCnt = 1; dayCnt <= lastDay; dayCnt++) {
+
+    const cell = sheet.getRange(row, column);
+
+    cell.setValue(dayCnt);
+    cell.setFontSize(15);
+    cell.setVerticalAlignment("top");
+    cell.setHorizontalAlignment("left");
+
+    // 日曜
+    if (column === 1) {
+      cell.setFontColor("red");
+    }
+    // 土曜
+    else if (column === 7) {
+      cell.setFontColor("blue");
+    }
+
+    column++;
+
+    if (column >= WEEK) {
+      column = 1;
+
+      if (row < WEEK) {
+        row++;
+      } else {
+        row = WEEK;
+      }
+    }
+  }
+
+  // タイトル
+  sheet.getRange("A1:G1").merge();
+  sheet.getRange("A1")
+    .setValue(`${year}年${month}月 カレンダー`)
+    .setFontSize(25)
+    .setHorizontalAlignment("center");
+
+  // レイアウト
+  sheet.setColumnWidths(1, 7, 140);
+
+  if (row >= 8) {
+
+    for (let r = 3; r <= 8; r++) {
+      sheet.setRowHeight(r, 60);
+    }
+
+    sheet.getRange("A2:G8").setBorder(
+      true, true, true, true, true, true
+    );
+
+  } else {
+
+    for (let r = 3; r <= 7; r++) {
+      sheet.setRowHeight(r, 60);
+    }
+
+    sheet.getRange("A2:G7").setBorder(
+      true, true, true, true, true, true
+    );
+  }
+}
+
+
