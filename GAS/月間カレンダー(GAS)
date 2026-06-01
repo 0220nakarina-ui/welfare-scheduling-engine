@@ -13,38 +13,48 @@ function calender() {
 
   const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
 
-// 初期化
-sheet.clear()
+  // 初期化
+  sheet.clear();
 
-// 年入力
-let month;
-do {
-  month = Number(
-    SpreadsheetApp.getUi().prompt(
-      "月を入力してください(1~12)"
-    ).getResponseText()
-  );
-}while (month < MONTH_START || month > MONTH_END);
+  // 【修正】年入力の処理を追加
+  let year;
+  do {
+    year = Number(
+      SpreadsheetApp.getUi().prompt(
+        "年を入力してください(1900~2100)"
+      ).getResponseText()
+    );
+  } while (year < YEAR_START || year > YEAR_END || isNaN(year));
 
-// 曜日
-const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
+  // 月入力
+  let month;
+  do {
+    month = Number(
+      SpreadsheetApp.getUi().prompt(
+        "月を入力してください(1~12)"
+      ).getResponseText()
+    );
+  } while (month < MONTH_START || month > MONTH_END || isNaN(month));
 
-for (let col = 0; col < WEEK_ARRAY; col++); {
-  const cell = sheet.getRange(2, col + 1);
+  // 曜日
+  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
 
-  cell.setValue(weekdays[col]);
-  cell.setHorizontalAlignment("center");
-  cell.setFontWeight("bold");
-}
+  // 【修正】for文の後ろの不要なセミコロン「;」を削除
+  for (let col = 0; col < WEEK_ARRAY; col++) {
+    const cell = sheet.getRange(2, col + 1);
 
-// 月初・月末取得
-const startDate = new Date(year, month - 1, 1);
+    cell.setValue(weekdays[col]);
+    cell.setHorizontalAlignment("center");
+    cell.setFontWeight("bold");
+  }
 
+  // 月初・月末取得
+  const startDate = new Date(year, month - 1, 1);
   const lastDay = new Date(year, month, 0).getDate();
 
   let row = 3;
 
-  // 0=日曜日
+  // 0=日曜日 ➔ GASの列番号に合わせるため +1
   let column = startDate.getDay() + 1;
 
   // 日付入力
@@ -68,14 +78,9 @@ const startDate = new Date(year, month - 1, 1);
 
     column++;
 
-    if (column >= WEEK) {
+    if (column > WEEK_ARRAY) {
       column = 1;
-
-      if (row < WEEK) {
-        row++;
-      } else {
-        row = WEEK;
-      }
+      row++; // 【修正】制限をなくし、次の行へ進める
     }
   }
 
@@ -89,26 +94,22 @@ const startDate = new Date(year, month - 1, 1);
   // レイアウト
   sheet.setColumnWidths(1, 7, 140);
 
-  if (row >= 8) {
-
+  // 【修正】最終的なrowの番号で行数を判定し、枠線と高さを設定
+  if (row > 7) {
+    // 6週ある月（最大8行目まで使う）
     for (let r = 3; r <= 8; r++) {
       sheet.setRowHeight(r, 60);
     }
-
     sheet.getRange("A2:G8").setBorder(
       true, true, true, true, true, true
     );
-
   } else {
-
+    // 5週で収まる月（7行目まで使う）
     for (let r = 3; r <= 7; r++) {
       sheet.setRowHeight(r, 60);
     }
-
     sheet.getRange("A2:G7").setBorder(
       true, true, true, true, true, true
     );
   }
 }
-
-
