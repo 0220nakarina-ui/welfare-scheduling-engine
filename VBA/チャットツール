@@ -1,0 +1,66 @@
+Sub TransferData()
+    Dim wsInput As Worksheet
+    Dim wsLog As Worksheet
+    Dim nextRow As Long
+    
+    
+    ' 各シートの設定（実際のシート名に書き換えてください）
+    Set wsInput = ThisWorkbook.Sheets("書き込み用シート")
+    Set wsLog = ThisWorkbook.Sheets("返信用シート")
+    
+    
+    ' 入力チェック
+    If Trim(wsInput.Range("B11").Value) = "" Then
+        MsgBox "記入欄が空欄です。内容を入力してください。", vbExclamation, "入力エラー"
+        Exit Sub
+    End If
+    
+    
+    ' 2枚目シートのA列の次の書き込み行を特定
+    nextRow = wsLog.Cells(wsLog.Rows.Count, "A").End(xlUp).Row + 1
+    If nextRow < 2 Then nextRow = 2
+    
+    
+    ' データの転記と書式設定
+    With wsLog
+        .Cells(nextRow, "B").Value = wsInput.Range("D8").Value   ' 日付
+        .Cells(nextRow, "D").Value = wsInput.Range("G8").Value   ' 相談内容
+        .Cells(nextRow, "A").Value = wsInput.Range("J8").Value   ' 相談者
+        .Cells(nextRow, "E").Value = wsInput.Range("B11").Value  ' 記入欄
+        
+        
+        
+        ' 記入欄の転記と折り返し設定
+        With .Cells(nextRow, "E")
+            .Value = wsInput.Range("B11").Value
+            .WrapText = True
+        End With
+        
+        
+        ' 文字数に合わせて行の高さを自動調整
+        .Rows(nextRow).AutoFit
+    End With
+    
+    ' 内容クリア処理
+    wsInput.Range("G8").ClearContents                ' 相談内容
+    wsInput.Range("J8").ClearContents                ' 相談者
+    wsInput.Range("B11").MergeArea.ClearContents     ' 記入欄
+    
+    
+    On Error GoTo ErrHandler
+    
+    ' 初期化
+    Application.ScreenUpdating = True
+    
+    ' 完了メッセージ
+    MsgBox "書き込みが完了しました！" & vbCrLf & "返信までしばらくお待ちください。", vbInformation
+    Exit Sub
+
+ErrHandler:
+Application.ScreenUpdating = True
+MsgBox "エラーが発生しました。" & vbCrLf & Err.Description, vbCritical
+End Sub
+
+
+
+
