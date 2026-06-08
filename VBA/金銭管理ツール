@@ -1,0 +1,45 @@
+Sub 物欲マクロ()
+
+    Dim ws As Worksheet
+    Dim i As Long
+    Dim Total As Double                    ' 総額
+    Dim Budget As Double                   ' 割当予算
+    Dim Budget_remaining As Double         ' 使用可能予算
+    Set ws = ActiveSheet
+
+
+    '価格集計
+    Total = 0
+    For i = 4 To 103
+        If IsNumeric(ws.Cells(i, 4).Value) Then
+            Total = Total + CDbl(ws.Cells(i, 4).Value)
+        End If
+    Next i
+
+
+    '使用総計
+    ws.Range("E2").Value = Total
+
+
+    '予算取得
+    If IsNumeric(ws.Range("B2").Value) Then
+        Budget = CDbl(ws.Range("B2").Value)
+        Budget_remaining = Budget - Total
+        ws.Range("H2").Value = Budget_remaining
+
+
+        '予算超過
+        If Total > Budget Then
+            ws.Range("E2").Interior.Color = RGB(127, 255, 212)
+            ws.Range("H2").Interior.Color = RGB(127, 255, 212)
+        Else
+
+
+            ws.Range("E2").Interior.ColorIndex = xlNone
+            ws.Range("H2").Interior.ColorIndex = xlNone
+        End If
+
+    End If
+
+    
+End Sub
