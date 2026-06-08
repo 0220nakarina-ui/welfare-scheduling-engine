@@ -1,0 +1,43 @@
+function transferData() {
+
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  const wsInput = ss.getSheetByName("書き込み用シート");
+  const wsLog = ss.getSheetByName("返信用シート");
+
+  // 入力チェック（B11）
+  const inputValue = wsInput.getRange("B11").getValue();
+
+  if (inputValue.toString().trim() === "") {
+    SpreadsheetApp.getUi().alert("記入欄が空欄です。内容を入力してください。");
+    return;
+  }
+
+  // 次の書き込み行（A列基準）
+  const lastRow = wsLog.getRange("A:A").getLastRow();
+  let nextRow = lastRow + 1;
+  if (nextRow < 2) nextRow = 2;
+
+  // データ転記
+  wsLog.getRange(nextRow, 2).setValue(wsInput.getRange("D8").getValue()); // B列 日付
+  wsLog.getRange(nextRow, 4).setValue(wsInput.getRange("G8").getValue()); // D列 相談内容
+  wsLog.getRange(nextRow, 1).setValue(wsInput.getRange("J8").getValue()); // A列 相談者
+  wsLog.getRange(nextRow, 5).setValue(inputValue); // E列 記入欄
+
+  // 折り返し設定
+  const eCell = wsLog.getRange(nextRow, 5);
+  eCell.setWrap(true);
+
+  // 行の高さ自動調整（VBAのAutoFit相当）
+  wsLog.autoResizeRow(nextRow);
+
+  // 内容クリア
+  wsInput.getRange("G8").clearContent(); // 相談内容
+  wsInput.getRange("J8").clearContent(); // 相談者
+  wsInput.getRange("B11").clearContent(); // 記入欄（結合セルでもOK）
+
+  // 完了メッセージ
+  SpreadsheetApp.getUi().alert(
+    "書き込みが完了しました！\n返信までしばらくお待ちください。"
+  );
+}
