@@ -1,0 +1,81 @@
+
+' 修正版】「データ削除」ボタン用マクロ
+
+Sub Data_Delete_Click()
+    Dim ws As Worksheet
+    Set ws = ActiveSheet
+    
+    ' 画面の更新を一時停止（チラつき防止）
+    Application.ScreenUpdating = False
+    
+    ' 1. 文字の色をすべて「自動（黒）」に戻す（念のための対策）
+    ws.Range("D4:G22").Font.ColorIndex = xlAutomatic
+    ws.Range("E24:E26").Font.ColorIndex = xlAutomatic
+    
+    ' 2. 表の中身（必要なもの、金額、個数、総額）のデータを消去
+    ws.Range("D4:G22").ClearContents
+    
+    ' 3. 使用金額（E25）と残高（E26）を消去（予算 E24 は手動入力のため残す）
+    ws.Range("E25:E26").ClearContents
+    
+    ' 画面の更新を再開
+    Application.ScreenUpdating = True
+    
+    ' 静かにポップアップでお知らせ
+    MsgBox "データを削除しました。", vbInformation, "お知らせ"
+End Sub
+
+' 【修正版】「自動計算」ボタン用マクロ
+
+
+Sub Calculate_And_Print()
+    Dim ws As Worksheet
+    Dim i As Long
+    Dim totalAmount As Currency
+    Dim budget As Currency
+    Dim balance As Currency
+    
+    Set ws = ActiveSheet
+    totalAmount = 0
+    
+    ' 画面の更新を一時停止（チラつき防止）
+    Application.ScreenUpdating = False
+    
+    ' 念のため文字色をすべて「自動（黒）」に戻す
+    ws.Range("D4:G22").Font.ColorIndex = xlAutomatic
+    ws.Range("E24:E26").Font.ColorIndex = xlAutomatic
+    
+    ' 4行目から22行目までループ処理
+    For i = 4 To 22
+        ' 金額（E列＝5番目）と 個数（F列＝6番目）に値が入っているかチェック
+        If ws.Cells(i, 5).Value <> "" And ws.Cells(i, 6).Value <> "" Then
+            
+            ' 金額(E列) × 個数(F列) ＝ 総額(G列＝7番目) の計算
+            ws.Cells(i, 7).Value = ws.Cells(i, 5).Value * ws.Cells(i, 6).Value
+            
+            ' 総合計（使用金額）に加算
+            totalAmount = totalAmount + ws.Cells(i, 7).Value
+        Else
+            ' どちらかが空欄なら総額も消す
+            ws.Cells(i, 7).Value = ""
+        End If
+    Next i
+    
+    ' 使用金額を E25 へ自動転記
+    ws.Range("E25").Value = totalAmount
+    
+    ' 予算（E24）に数値が入っていれば、残高（E26）を計算
+    If IsNumeric(ws.Range("E24").Value) And ws.Range("E24").Value <> "" Then
+        budget = ws.Range("E24").Value
+        balance = budget - totalAmount
+        ws.Range("E26").Value = balance
+    Else
+        ws.Range("E26").Value = ""
+    End If
+    
+    ' 画面の更新を再開
+    Application.ScreenUpdating = True
+
+    
+    MsgBox "計算終了しました。印刷等で経費管理をしてください。", vbInformation, "お知らせ"
+End Sub
